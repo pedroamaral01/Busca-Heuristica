@@ -134,11 +134,26 @@ for idx, m in enumerate(masmorras, start=1):
 
 def cor(val, masmorra=False):
     if masmorra:
-        return {'0': "black", '1': "white", '3': "orange", '4': "purple"}.get(val, "gray")
+        return {
+            '0': "black",
+            '1': "white",
+            '3': "orange",
+            '4': "purple"
+        }.get(val, "gray")
     else:
-        return {'0': "lightgreen", '1': "khaki", '2': "forestgreen", '3': "saddlebrown",
-                '4': "blue", '5': "gold", 'A': "red", 'B': "red", 'C': "red",
-                '7': "darkgreen", '8': "red"}.get(val, "black")
+        return {
+            '0': "lightgreen",   # Grama
+            '1': "khaki",        # Areia
+            '2': "forestgreen",  # Floresta
+            '3': "saddlebrown",  # Montanha
+            '4': "blue",         # Água
+            '5': "gold",         # Master Sword
+            'A': "red",          # Entrada masmorra 1
+            'B': "red",          # Entrada masmorra 2
+            'C': "red",          # Entrada masmorra 3
+            '7': "purple",       # Lost Woods (destaque roxo)
+            '8': "orange"        # Início do Link (destaque laranja)
+        }.get(val, "black")
 
 def desenhar(mapa, masmorra=False, canvas=None):
     for i, row in enumerate(mapa):
@@ -161,7 +176,17 @@ def animar():
     if idx_anim >= len(melhor_caminho_total):
         label_custo.config(text=f"Custo final: {custo_acumulado}")
         return
+
     mapa_id, (r, c) = melhor_caminho_total[idx_anim]
+
+    if mapa_id == "main" and mapa_principal[r][c] == '7':
+        custo_acumulado += CUSTOS_HYRULE['7']
+        canvas_main.create_oval(c * cell_size + 2, r * cell_size + 2,
+                                (c + 1) * cell_size - 2, (r + 1) * cell_size - 2,
+                                fill="red")
+        label_custo.config(text=f"Custo final : {custo_acumulado}")
+        return
+
     if mapa_id == "main":
         custo_acumulado += CUSTOS_HYRULE[mapa_principal[r][c]]
         canvas_main.create_oval(c * cell_size + 2, r * cell_size + 2,
@@ -173,6 +198,7 @@ def animar():
         canvas_masmorras[num].create_oval(c * cell_size + 2, r * cell_size + 2,
                                           (c + 1) * cell_size - 2, (r + 1) * cell_size - 2,
                                           fill="red")
+
     label_custo.config(text=f"Custo acumulado: {custo_acumulado}")
     idx_anim += 1
     root.after(50, animar)
