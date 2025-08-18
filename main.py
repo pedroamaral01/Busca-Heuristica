@@ -67,7 +67,6 @@ masmorras = [ler_mapa("masmorra1.txt"),
 # --- Localizar pontos ---
 pos_link = localizar(mapa_principal, '8')
 pos_lost_woods = localizar(mapa_principal, '7')
-pos_master_sword = localizar(mapa_principal, '5')
 entradas = {1: localizar(mapa_principal, 'A'),
             2: localizar(mapa_principal, 'B'),
             3: localizar(mapa_principal, 'C')}
@@ -94,22 +93,23 @@ for ordem in ordens:
     pos_atual = pos_link
     for idx_masm in ordem:
         masm = masm_info[idx_masm]
+        # até portão
         cam, custo = a_star(mapa_principal, pos_atual, masm["portao"], CUSTOS_HYRULE)
         caminho_total_temp += [("main", p) for p in cam]
         custo_total += custo
-        cam, custo = a_star(masm["mapa"], masm["entrada"], masm["pingente"], CUSTOS_MASMORRA)
-        caminho_total_temp += [(f"M{idx_masm+1}", p) for p in cam]
-        custo_total += custo
-        cam, custo = a_star(masm["mapa"], masm["pingente"], masm["entrada"], CUSTOS_MASMORRA)
-        caminho_total_temp += [(f"M{idx_masm+1}", p) for p in cam]
-        custo_total += custo
+        # entrada → pingente → entrada
+        for a, b in [(masm["entrada"], masm["pingente"]),
+                     (masm["pingente"], masm["entrada"])]:
+            cam, custo = a_star(masm["mapa"], a, b, CUSTOS_MASMORRA)
+            caminho_total_temp += [(f"M{idx_masm+1}", p) for p in cam]
+            custo_total += custo
         pos_atual = masm["portao"]
+
+    # saída da última masmorra → Lost Woods (destino final)
     cam, custo = a_star(mapa_principal, pos_atual, pos_lost_woods, CUSTOS_HYRULE)
     caminho_total_temp += [("main", p) for p in cam]
     custo_total += custo
-    cam, custo = a_star(mapa_principal, pos_lost_woods, pos_master_sword, CUSTOS_HYRULE)
-    caminho_total_temp += [("main", p) for p in cam]
-    custo_total += custo
+
     if custo_total < melhor_custo:
         melhor_custo = custo_total
         melhor_caminho_total = caminho_total_temp
